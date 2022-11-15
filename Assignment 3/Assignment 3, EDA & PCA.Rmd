@@ -1,0 +1,72 @@
+---
+title: "Stat 147 Assignment 4"
+author:
+- name: Marc Shervin Ignacio
+  affiliation: "2019-04690"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    theme: lumen
+    toc: yes
+    toc_float: yes
+    toc_depth: 4
+    number_sections: no
+    highlight: pygments
+    fig_caption: yes
+    code_folding: show
+editor_options:
+  markdown:
+    wrap: 72
+---
+```{r, echo=FALSE}
+show_table <- function(x,text=NULL){
+  x %>%
+  kbl(caption=text) %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+}
+```
+
+```{r setup, warning=FALSE,message=FALSE}
+library(knitr)
+library(kableExtra)
+library(ggplot2)
+```
+
+```{r}
+nba <- readxl::read_xlsx('NBA 1819 Regular Season - Data.xlsx')
+
+show_table(head(nba),"NBA 1819 Regular Season Data")
+```
+### Knowing more about our dataset:
+```{r}
+str(nba)
+```
+
+```{r}
+summary(nba)
+```
+### Preparing our data
+```{r}
+colnames(nba)
+```
+
+```{r}
+nba_shooting <- nba[9:17]
+show_table(head(nba_shooting), "Shooting statistics")
+
+nba_nonshooting <- nba[18:ncol(nba)]
+show_table(head(nba_nonshooting), "Shooting statistics")
+```
+
+
+
+
+### Principal Component Analysis
+```{r}
+pca_shooting <- prcomp(x = nba_shooting, scale.=T)
+show_table(summary(pca_shooting)$importance, "Importance of components")
+show_table(cbind(1:length(pca_shooting$sdev),pca_shooting$sdev),"Standard deviation of components")
+show_table(pca_shooting$rotation, "Rotation of components")
+```
+
+
