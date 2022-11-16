@@ -27,6 +27,7 @@ show_table <- function(x,text=NULL){
 ```
 
 ```{r setup, warning=FALSE,message=FALSE}
+library(factoextra)
 library(knitr)
 library(kableExtra)
 library(ggplot2)
@@ -92,6 +93,16 @@ data_with_scores %>% show_table()
 ```
 ### Visualization of results
 ```{r}
+layout(matrix(1:2, ncol=2))
+screeplot(pca_shooting)
+screeplot(pca_shooting, type="lines")
+```
+```{r}
+factoextra::fviz_pca_var(pca_shooting)
+```
+
+
+```{r}
 data_with_scores %>%
   filter(center + forward + guard == 1) %>%
   group_by(POSITION) %>%
@@ -105,6 +116,9 @@ data_with_scores %>%
     geom_bar(aes(fill = POSITION), position = "dodge", stat = "identity") +
     ggthemes::theme_gdocs()
 ```
+
+
+
 
 ```{r}
 center1 <- data_with_scores %>% select(shooting1, shooting2)
