@@ -141,6 +141,12 @@ data_with_scores %>%
     ggthemes::theme_gdocs()
 ```
 
+```{r}
+data_with_scores %>%
+  filter(center + forward + guard == 1) %>%
+  group_by(POSITION) %>%
+  summarise(across(everything(), mean))
+```
 
 
 
