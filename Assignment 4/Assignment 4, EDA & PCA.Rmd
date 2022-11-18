@@ -147,14 +147,14 @@ data_with_scores %>%
   filter(center + forward + guard == 1) %>%
   group_by(POSITION) %>%
   summarise(across(everything(), mean)) %>%
-  select(9:17) %>%
+  select(c("POSITION",9:17)) %>%
   show_table("Mean across shooting statistics")
 
 data_with_scores %>%
   filter(center + forward + guard == 1) %>%
   group_by(POSITION) %>%
   summarise(across(everything(), mean)) %>%
-  select(18:ncol(nba)) %>%
+  select(c("POSITION",18:ncol(nba))) %>%
   show_table("Mean across nonshooting statistics")
 ```
 
@@ -193,5 +193,24 @@ data_with_scores %>%
   geom_point(aes(col = center)) +
   geom_text_repel(aes(label = label), max.overlaps = 20, size = 3) +
   scale_color_manual(values = c("gray80", "firebrick"))
+```
+
+```{r}
+data_with_scores %>%
+  mutate(
+    outlier = (mahal1 > 9) & (shooting1 < 0) & (shooting2 > 0) & guard,
+    label   = if_else(outlier, PLAYER, "")
+  ) %>%
+  select(PLAYER,outlier) %>% show_table()
+```
+
+```{r}
+data_with_scores %>%
+  mutate(
+    extreme = (mahal2 > 9) & (others1 < 0) & (others2 < 0) & guard,
+    label   = if_else(extreme, PLAYER, "")
+  ) %>%
+  select(PLAYER, extreme)%>%
+  show_table()
 ```
 
