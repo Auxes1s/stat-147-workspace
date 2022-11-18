@@ -142,10 +142,13 @@ data_with_scores %>%
 ```
 
 ```{r}
+#MEAN BY POSITION
 data_with_scores %>%
   filter(center + forward + guard == 1) %>%
   group_by(POSITION) %>%
-  summarise(across(everything(), mean))
+  summarise(across(everything(), mean)) %>%
+  show_table("Mean across all columns")
+
 ```
 
 
