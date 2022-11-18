@@ -147,8 +147,15 @@ data_with_scores %>%
   filter(center + forward + guard == 1) %>%
   group_by(POSITION) %>%
   summarise(across(everything(), mean)) %>%
-  show_table("Mean across all columns")
+  select(9:17) %>%
+  show_table("Mean across shooting statistics")
 
+data_with_scores %>%
+  filter(center + forward + guard == 1) %>%
+  group_by(POSITION) %>%
+  summarise(across(everything(), mean)) %>%
+  select(18:ncol(nba)) %>%
+  show_table("Mean across nonshooting statistics")
 ```
 
 
