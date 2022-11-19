@@ -18,12 +18,13 @@ editor_options:
   markdown:
     wrap: 72
 ---
-```{r}
+```{r, warning=FALSE,message=FALSE}
 library(psych)
 library("GPArotation")
 library("readxl")
 library(knitr)
 library(kableExtra)
+library(ggplot2)
 ```
 
 ```{r, echo=FALSE}
@@ -38,9 +39,11 @@ show_table <- function(x,text=NULL){
 ```{r}
 vitamin <- read_xlsx("vitamins example data.xlsx")
 vitamin %>%
+  head %>%
   show_table("Dataset")
 ```
 
+### Tests for adequacy
 Kaiser-Meyer-Olkin Measure of Sampling Adequacy
 ```{r}
 psych::KMO(r = vitamin)
@@ -51,7 +54,36 @@ Test for Sphericity
 psych::cortest.bartlett(R = cor(vitamin), n = 300)
 ```
 
-EFA Section
+```{r, echo=FALSE, collapse=TRUE}
+code_category <- function(x){
+  dplyr::case_when(x == "p1" ~ "increases body resistance",
+            x == "p2" ~ "makes body strong and healthy",
+            x == "p3" ~ " provides extra energy/strength",
+            x == "p4" ~ "enhances/increasesappetite",
+            x == "p5" ~ "sharpens memory/enhances mental alertness",
+            x == "p6" ~ "has no side effects",
+            x == "p7" ~ "promotes weight gain",
+            x == "p8" ~ "revitalizes/conditions body",
+            x == "p9" ~ "relieves tiredness/fatigue/stress",
+            x == "p10" ~ "has complete vitamins and minerals",
+            x == "p11" ~ "fights lack of sleep",
+            x == "p12" ~ "has nice packaging",
+            x == "p13" ~ "promotes healthy hair",
+            x == "p14" ~ "has affordable price",
+            x == "p15" ~ "promotes growth/height",
+            x == "p16" ~ "readily available",
+            x == "p17" ~ "makes bones/teeth strong",
+            x == "p18" ~ "promotes better blood circulation",
+            x == "p19" ~ "promotes good skin",
+            x == "p20" ~ "promotes good eyesight",
+            x == "p21" ~ " makes one feel younger/revitalized",
+            x == "p22" ~ "extends peak hours",
+            x == "p23" ~ "keeps one full of energy",
+            TRUE ~ "NA")
+  }
+```
+### EFA Section
+
 
 ```{r}
 library(nFactors)
@@ -95,18 +127,18 @@ fa.diagram(fa_4oblimin)
 ```{r}
 fa.sort(fa_4varimax$loadings)
 ```
-```{r,collapse=TRUE}
+```{r,echo=FALSE,collapse=TRUE}
 fa_4varimax_sorted <- fa.sort(fa_4varimax$loadings) 
 loading_matrix <- as.data.frame((matrix(fa_4varimax_sorted, ncol = 4, nrow = 23, 
                          dimnames = list(NULL,colnames(fa_4varimax_sorted)))))
 loading_matrix <- cbind(loading_matrix,Test = rownames(fa_4varimax_sorted))
 ```
-```{r,collapse=TRUE}
+```{r,echo=FALSE,collapse=TRUE}
 loadings_melted <- reshape2::melt(loading_matrix, id="Test",
                                   measure=c("PA1", "PA4", "PA2", "PA3"),
                                   variable.name="Factor", value.name="Loading")
 ```
-```{r,collapse=TRUE}
+```{r,echo=FALSE,collapse=TRUE}
 positions <- rev(rownames(fa_4varimax_sorted))
 
 ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) + 
@@ -117,24 +149,25 @@ ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) +
   scale_fill_gradient2(name = "Loading", 
                        high = "blue", mid = "white", low = "red", 
                        midpoint=0, guide=F) +
-  scale_x_discrete(limits = positions) +
+  scale_x_discrete(label = code_category(positions), limits = positions) +
+  ggtitle("4 Factors - Varimax") +
   xlab("Variables") +
   ylab("Loading Strength") + #improve y-axis label
   theme_bw(base_size=10)
 ```
 
-```{r,collapse=TRUE}
+```{r,echo=FALSE,collapse=TRUE}
 fa_4quartimax_sorted <- fa.sort(fa_4quartimax$loadings) 
 loading_matrix <- as.data.frame((matrix(fa_4quartimax_sorted, ncol = 4, nrow = 23, 
                          dimnames = list(NULL,colnames(fa_4quartimax_sorted)))))
 loading_matrix <- cbind(loading_matrix,Test = rownames(fa_4quartimax_sorted))
 ```
-```{r,collapse=TRUE}
+```{r,echo=FALSE,collapse=TRUE}
 loadings_melted <- reshape2::melt(loading_matrix, id="Test",
                                   measure=c("PA1", "PA4", "PA2", "PA3"),
                                   variable.name="Factor", value.name="Loading")
 ```
-```{r,collapse=TRUE}
+```{r,echo=FALSE,collapse=TRUE}
 positions <- rev(rownames(fa_4quartimax_sorted))
 
 ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) + 
@@ -145,24 +178,24 @@ ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) +
   scale_fill_gradient2(name = "Loading", 
                        high = "blue", mid = "white", low = "red", 
                        midpoint=0, guide=F) +
-  scale_x_discrete(limits = positions) +
-  
+  scale_x_discrete(label = code_category(positions), limits = positions) +
   xlab("Variables") +
+  ggtitle("4 Factors - Quartimax") +
   ylab("Loading Strength") + #improve y-axis label
   theme_bw(base_size=10)
 ```
-```{r,collapse=TRUE}
+```{r,echo=FALSE,collapse=TRUE}
 fa_4oblimin_sorted <- fa.sort(fa_4oblimin$loadings) 
 loading_matrix <- as.data.frame((matrix(fa_4oblimin_sorted, ncol = 4, nrow = 23, 
                          dimnames = list(NULL,colnames(fa_4oblimin_sorted)))))
 loading_matrix <- cbind(loading_matrix,Test = rownames(fa_4oblimin_sorted))
 ```
-```{r,collapse=TRUE}
+```{r,echo=FALSE,collapse=TRUE}
 loadings_melted <- reshape2::melt(loading_matrix, id="Test",
                                   measure=c("PA1", "PA4", "PA2", "PA3"),
                                   variable.name="Factor", value.name="Loading")
 ```
-```{r,collapse=TRUE}
+```{r,echo=FALSE,collapse=TRUE}
 positions <- rev(rownames(fa_4oblimin_sorted))
 
 ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) + 
@@ -173,11 +206,13 @@ ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) +
   scale_fill_gradient2(name = "Loading", 
                        high = "blue", mid = "white", low = "red", 
                        midpoint=0, guide=F) +
-  scale_x_discrete(limits = positions) +
-  
+  scale_x_discrete(label = code_category(positions), limits = positions) +
   xlab("Variables") +
+  ggtitle("4 Factors - Oblimin") +
   ylab("Loading Strength") + #improve y-axis label
   theme_bw(base_size=10)
 ```
+
+
 
 
