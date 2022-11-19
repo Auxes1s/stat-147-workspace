@@ -94,7 +94,7 @@ nS <- nScree(x=ev$values, aparallel=ap$eigen$qevpea)
 plotnScree(nS)
 ```
 
-
+#### 4 FACTORS
 ```{r}
 fa_4varimax <- psych::fa(r = vitamin,
 nfactors = 4,
@@ -135,7 +135,7 @@ loading_matrix <- cbind(loading_matrix,Test = rownames(fa_4varimax_sorted))
 ```
 ```{r,echo=FALSE,collapse=TRUE}
 loadings_melted <- reshape2::melt(loading_matrix, id="Test",
-                                  measure=c("PA1", "PA4", "PA2", "PA3"),
+                                  measure=colnames(fa_4varimax_sorted),
                                   variable.name="Factor", value.name="Loading")
 ```
 ```{r,echo=FALSE,collapse=TRUE}
@@ -164,7 +164,7 @@ loading_matrix <- cbind(loading_matrix,Test = rownames(fa_4quartimax_sorted))
 ```
 ```{r,echo=FALSE,collapse=TRUE}
 loadings_melted <- reshape2::melt(loading_matrix, id="Test",
-                                  measure=c("PA1", "PA4", "PA2", "PA3"),
+                                  measure=colnames(fa_4quartimax_sorted),
                                   variable.name="Factor", value.name="Loading")
 ```
 ```{r,echo=FALSE,collapse=TRUE}
@@ -192,7 +192,7 @@ loading_matrix <- cbind(loading_matrix,Test = rownames(fa_4oblimin_sorted))
 ```
 ```{r,echo=FALSE,collapse=TRUE}
 loadings_melted <- reshape2::melt(loading_matrix, id="Test",
-                                  measure=c("PA1", "PA4", "PA2", "PA3"),
+                                  measure=colnames(fa_4oblimin_sorted),
                                   variable.name="Factor", value.name="Loading")
 ```
 ```{r,echo=FALSE,collapse=TRUE}
@@ -213,6 +213,238 @@ ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) +
   theme_bw(base_size=10)
 ```
 
+#### 5 FACTORS
+```{r}
+fa_5varimax <- psych::fa(r = vitamin,
+nfactors = 5,
+rotate = "varimax",
+scores = "regression",
+SMC = T,
+fm = "pa")
+
+fa_5quartimax <- psych::fa(r = vitamin,
+nfactors = 5,
+rotate = "quartimax",
+scores = "regression",
+SMC = T,
+fm = "pa")
+
+fa_5oblimin <- psych::fa(r = vitamin,
+nfactors = 5,
+rotate = "oblimin",
+scores = "regression",
+SMC = T,
+fm = "pa")
+
+```
+```{r}
+fa.diagram(fa_5varimax)
+fa.diagram(fa_5quartimax)
+fa.diagram(fa_5oblimin)
+
+```
 
 
+```{r,echo=FALSE,collapse=TRUE}
+fa_5varimax_sorted <- fa.sort(fa_5varimax$loadings) 
+loading_matrix <- as.data.frame((matrix(fa_5varimax_sorted, ncol = 5, nrow = 23, 
+                         dimnames = list(NULL,colnames(fa_5varimax_sorted)))))
+loading_matrix <- cbind(loading_matrix,Test = rownames(fa_5varimax_sorted))
+```
+```{r,echo=FALSE,collapse=TRUE}
+loadings_melted <- reshape2::melt(loading_matrix, id="Test",
+                                  measure=colnames(fa_5varimax_sorted),
+                                  variable.name="Factor", value.name="Loading")
+```
+```{r,echo=FALSE,collapse=TRUE}
+positions <- rev(rownames(fa_5varimax_sorted))
 
+ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) + 
+  facet_wrap(~ Factor, nrow=1) + #place the factors in separate facets
+  geom_bar(stat="identity") + #make the bars
+  coord_flip() + #flip the axes so the test names can be horizontal  
+  #define the fill color gradient: blue=positive, red=negative
+  scale_fill_gradient2(name = "Loading", 
+                       high = "blue", mid = "white", low = "red", 
+                       midpoint=0, guide=F) +
+  scale_x_discrete(label = code_category(positions), limits = positions) +
+  xlab("Variables") +
+  ggtitle("5 Factors - Varimax") +
+  ylab("Loading Strength") + #improve y-axis label
+  theme_bw(base_size=10)
+```
+```{r,echo=FALSE,collapse=TRUE}
+fa_5quartimax_sorted <- fa.sort(fa_5quartimax$loadings) 
+loading_matrix <- as.data.frame((matrix(fa_5quartimax_sorted, ncol = 5, nrow = 23, 
+                         dimnames = list(NULL,colnames(fa_5quartimax_sorted)))))
+loading_matrix <- cbind(loading_matrix,Test = rownames(fa_5quartimax_sorted))
+```
+```{r,echo=FALSE,collapse=TRUE}
+loadings_melted <- reshape2::melt(loading_matrix, id="Test",
+                                  measure=colnames(fa_5quartimax_sorted),
+                                  variable.name="Factor", value.name="Loading")
+```
+```{r,echo=FALSE,collapse=TRUE}
+positions <- rev(rownames(fa_5quartimax_sorted))
+
+ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) + 
+  facet_wrap(~ Factor, nrow=1) + #place the factors in separate facets
+  geom_bar(stat="identity") + #make the bars
+  coord_flip() + #flip the axes so the test names can be horizontal  
+  #define the fill color gradient: blue=positive, red=negative
+  scale_fill_gradient2(name = "Loading", 
+                       high = "blue", mid = "white", low = "red", 
+                       midpoint=0, guide=F) +
+  scale_x_discrete(label = code_category(positions), limits = positions) +
+  xlab("Variables") +
+  ggtitle("5 Factors - Quartimax") +
+  ylab("Loading Strength") + #improve y-axis label
+  theme_bw(base_size=10)
+```
+
+```{r,echo=FALSE,collapse=TRUE}
+fa_5oblimin_sorted <- fa.sort(fa_5oblimin$loadings) 
+loading_matrix <- as.data.frame((matrix(fa_5oblimin_sorted, ncol = 5, nrow = 23, 
+                         dimnames = list(NULL,colnames(fa_5oblimin_sorted)))))
+loading_matrix <- cbind(loading_matrix,Test = rownames(fa_5oblimin_sorted))
+```
+```{r,echo=FALSE,collapse=TRUE}
+loadings_melted <- reshape2::melt(loading_matrix, id="Test",
+                                  measure=colnames(fa_5oblimin_sorted),
+                                  variable.name="Factor", value.name="Loading")
+```
+```{r,echo=FALSE,collapse=TRUE}
+positions <- rev(rownames(fa_5oblimin_sorted))
+
+ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) + 
+  facet_wrap(~ Factor, nrow=1) + #place the factors in separate facets
+  geom_bar(stat="identity") + #make the bars
+  coord_flip() + #flip the axes so the test names can be horizontal  
+  #define the fill color gradient: blue=positive, red=negative
+  scale_fill_gradient2(name = "Loading", 
+                       high = "blue", mid = "white", low = "red", 
+                       midpoint=0, guide=F) +
+  scale_x_discrete(label = code_category(positions), limits = positions) +
+  xlab("Variables") +
+  ggtitle("5 Factors - Oblimin") +
+  ylab("Loading Strength") + #improve y-axis label
+  theme_bw(base_size=10)
+```
+
+#### 6 FACTORS
+```{r}
+fa_6varimax <- psych::fa(r = vitamin,
+nfactors = 6,
+rotate = "varimax",
+scores = "regression",
+SMC = T,
+fm = "pa")
+
+fa_6quartimax <- psych::fa(r = vitamin,
+nfactors = 6,
+rotate = "quartimax",
+scores = "regression",
+SMC = T,
+fm = "pa")
+
+fa_6oblimin <- psych::fa(r = vitamin,
+nfactors = 6,
+rotate = "oblimin",
+scores = "regression",
+SMC = T,
+fm = "pa")
+
+```
+```{r}
+fa.diagram(fa_6varimax)
+fa.diagram(fa_6quartimax)
+fa.diagram(fa_6oblimin)
+
+```
+
+
+```{r,echo=FALSE,collapse=TRUE}
+fa_6varimax_sorted <- fa.sort(fa_6varimax$loadings) 
+loading_matrix <- as.data.frame((matrix(fa_6varimax_sorted, ncol = 6, nrow = 23, 
+                         dimnames = list(NULL,colnames(fa_6varimax_sorted)))))
+loading_matrix <- cbind(loading_matrix,Test = rownames(fa_6varimax_sorted))
+```
+```{r,echo=FALSE,collapse=TRUE}
+loadings_melted <- reshape2::melt(loading_matrix, id="Test",
+                                  measure=colnames(fa_6varimax_sorted),
+                                  variable.name="Factor", value.name="Loading")
+```
+```{r,echo=FALSE,collapse=TRUE}
+positions <- rev(rownames(fa_6varimax_sorted))
+
+ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) + 
+  facet_wrap(~ Factor, nrow=1) + #place the factors in separate facets
+  geom_bar(stat="identity") + #make the bars
+  coord_flip() + #flip the axes so the test names can be horizontal  
+  #define the fill color gradient: blue=positive, red=negative
+  scale_fill_gradient2(name = "Loading", 
+                       high = "blue", mid = "white", low = "red", 
+                       midpoint=0, guide=F) +
+  scale_x_discrete(label = code_category(positions), limits = positions) +
+  xlab("Variables") +
+  ggtitle("6 Factors - Varimax") +
+  ylab("Loading Strength") + #improve y-axis label
+  theme_bw(base_size=10)
+```
+```{r,echo=FALSE,collapse=TRUE}
+fa_6quartimax_sorted <- fa.sort(fa_6quartimax$loadings) 
+loading_matrix <- as.data.frame((matrix(fa_6quartimax_sorted, ncol = 6, nrow = 23, 
+                         dimnames = list(NULL,colnames(fa_6quartimax_sorted)))))
+loading_matrix <- cbind(loading_matrix,Test = rownames(fa_6quartimax_sorted))
+```
+```{r,echo=FALSE,collapse=TRUE}
+loadings_melted <- reshape2::melt(loading_matrix, id="Test",
+                                  measure=colnames(fa_6quartimax_sorted),
+                                  variable.name="Factor", value.name="Loading")
+```
+```{r,echo=FALSE,collapse=TRUE}
+positions <- rev(rownames(fa_6quartimax_sorted))
+
+ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) + 
+  facet_wrap(~ Factor, nrow=1) + #place the factors in separate facets
+  geom_bar(stat="identity") + #make the bars
+  coord_flip() + #flip the axes so the test names can be horizontal  
+  #define the fill color gradient: blue=positive, red=negative
+  scale_fill_gradient2(name = "Loading", 
+                       high = "blue", mid = "white", low = "red", 
+                       midpoint=0, guide=F) +
+  scale_x_discrete(label = code_category(positions), limits = positions) +
+  xlab("Variables") +
+  ggtitle("6 Factors - Quartimax") +
+  ylab("Loading Strength") + #improve y-axis label
+  theme_bw(base_size=10)
+```
+
+```{r,echo=FALSE,collapse=TRUE}
+fa_6oblimin_sorted <- fa.sort(fa_6oblimin$loadings) 
+loading_matrix <- as.data.frame((matrix(fa_6oblimin_sorted, ncol = 6, nrow = 23, 
+                         dimnames = list(NULL,colnames(fa_6oblimin_sorted)))))
+loading_matrix <- cbind(loading_matrix,Test = rownames(fa_6oblimin_sorted))
+```
+```{r,echo=FALSE,collapse=TRUE}
+loadings_melted <- reshape2::melt(loading_matrix, id="Test",
+                                  measure=colnames(fa_6oblimin_sorted),
+                                  variable.name="Factor", value.name="Loading")
+```
+```{r,echo=FALSE,collapse=TRUE}
+positions <- rev(rownames(fa_6oblimin_sorted))
+
+ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) + 
+  facet_wrap(~ Factor, nrow=1) + #place the factors in separate facets
+  geom_bar(stat="identity") + #make the bars
+  coord_flip() + #flip the axes so the test names can be horizontal  
+  #define the fill color gradient: blue=positive, red=negative
+  scale_fill_gradient2(name = "Loading", 
+                       high = "blue", mid = "white", low = "red", 
+                       midpoint=0, guide=F) +
+  scale_x_discrete(label = code_category(positions), limits = positions) +
+  xlab("Variables") +
+  ggtitle("6 Factors - Oblimin") +
+  ylab("Loading Strength") + #improve y-axis label
+  theme_bw(base_size=10)
+```
