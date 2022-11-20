@@ -151,6 +151,7 @@ ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) +
                        midpoint=0, guide=F) +
   scale_x_discrete(label = code_category(positions), limits = positions) +
   ggtitle("4 Factors - Varimax") +
+  geom_hline(yintercept=0.3, size=0.7 ,col = 'red', linetype = "dotted") +
   xlab("Variables") +
   ylab("Loading Strength") + #improve y-axis label
   theme_bw(base_size=10)
@@ -180,6 +181,7 @@ ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) +
                        midpoint=0, guide=F) +
   scale_x_discrete(label = code_category(positions), limits = positions) +
   xlab("Variables") +
+  geom_hline(yintercept=0.3,size=0.7 ,col = 'red', linetype = "dotted") +
   ggtitle("4 Factors - Quartimax") +
   ylab("Loading Strength") + #improve y-axis label
   theme_bw(base_size=10)
@@ -208,6 +210,7 @@ ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) +
                        midpoint=0, guide=F) +
   scale_x_discrete(label = code_category(positions), limits = positions) +
   xlab("Variables") +
+  geom_hline(yintercept=0.3, size=0.7 ,col = 'red', linetype = "dotted") +
   ggtitle("4 Factors - Oblimin") +
   ylab("Loading Strength") + #improve y-axis label
   theme_bw(base_size=10)
@@ -269,6 +272,7 @@ ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) +
                        midpoint=0, guide=F) +
   scale_x_discrete(label = code_category(positions), limits = positions) +
   xlab("Variables") +
+  geom_hline(yintercept=0.3, size=0.7 ,col = 'red', linetype = "dotted") +
   ggtitle("5 Factors - Varimax") +
   ylab("Loading Strength") + #improve y-axis label
   theme_bw(base_size=10)
@@ -297,6 +301,7 @@ ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) +
                        midpoint=0, guide=F) +
   scale_x_discrete(label = code_category(positions), limits = positions) +
   xlab("Variables") +
+  geom_hline(yintercept=0.3, size=0.7 ,col = 'red', linetype = "dotted") +
   ggtitle("5 Factors - Quartimax") +
   ylab("Loading Strength") + #improve y-axis label
   theme_bw(base_size=10)
@@ -326,6 +331,7 @@ ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) +
                        midpoint=0, guide=F) +
   scale_x_discrete(label = code_category(positions), limits = positions) +
   xlab("Variables") +
+  geom_hline(yintercept=0.3, size=0.7 ,col = 'red', linetype = "dotted") +
   ggtitle("5 Factors - Oblimin") +
   ylab("Loading Strength") + #improve y-axis label
   theme_bw(base_size=10)
@@ -387,6 +393,7 @@ ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) +
                        midpoint=0, guide=F) +
   scale_x_discrete(label = code_category(positions), limits = positions) +
   xlab("Variables") +
+  geom_hline(yintercept=0.3, size=0.7 ,col = 'red', linetype = "dotted") +
   ggtitle("6 Factors - Varimax") +
   ylab("Loading Strength") + #improve y-axis label
   theme_bw(base_size=10)
@@ -415,6 +422,7 @@ ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) +
                        midpoint=0, guide=F) +
   scale_x_discrete(label = code_category(positions), limits = positions) +
   xlab("Variables") +
+  geom_hline(yintercept=0.3, size=0.7 ,col = 'red', linetype = "dotted") +
   ggtitle("6 Factors - Quartimax") +
   ylab("Loading Strength") + #improve y-axis label
   theme_bw(base_size=10)
@@ -444,6 +452,7 @@ ggplot(loadings_melted, aes(Test, abs(Loading), fill=Loading)) +
                        midpoint=0, guide=F) +
   scale_x_discrete(label = code_category(positions), limits = positions) +
   xlab("Variables") +
+  geom_hline(yintercept=0.3, size=0.7 ,col = 'red', linetype = "dotted") +
   ggtitle("6 Factors - Oblimin") +
   ylab("Loading Strength") + #improve y-axis label
   theme_bw(base_size=10)
