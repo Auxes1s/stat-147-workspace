@@ -1,0 +1,85 @@
+---
+title: "Stat 145 Assignment 6"
+author:
+  - name: "Marc Shervin Ignacio"
+    affiliation: "2019-04690"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    theme: lumen
+    toc: yes
+    toc_float: yes
+    toc_depth: 4
+    number_sections: no
+    highlight: pygments
+    fig_caption: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+```{r}
+library("tidyverse")
+library("readxl")
+library("cluster")
+library("fpc")
+library("NbClust")
+```
+
+```{r}
+competition <- read_excel("Local Competitiveness Data.xlsx", sheet = "DATA")
+data_matrix <- competition %>% select(-`PROVINCE / LGU`)
+```
+
+```{r}
+validation_stats <- NbClust::NbClust(data = data_matrix, diss = NULL, min.nc = 3, max.nc = 10, method = "ward.D")
+```
+```{r}
+validation_stats$All.index %>%
+  as_tibble(rownames = "no. of clusters")
+```
+```{r}
+validation_stats$Best.nc %>%
+  as_tibble(rownames = "Number_clusters")
+```
+
+```{r}
+agnes_z_wards <- cluster::agnes(x = data_matrix,diss = FALSE, stand = T, method = "ward")
+
+competition_clusters <- competition %>%
+                            mutate(
+                              if_3_clusters = cutree(agnes_z_wards, k = 3),
+                              if_4_clusters = cutree(agnes_z_wards, k = 4),
+                              if_5_clusters = cutree(agnes_z_wards, k = 5),
+                              if_6_clusters = cutree(agnes_z_wards, k = 6),
+                              if_7_clusters = cutree(agnes_z_wards, k = 7),
+                              if_8_clusters = cutree(agnes_z_wards, k = 8),
+                              if_9_clusters = cutree(agnes_z_wards, k = 9),
+                              if_10_clusters= cutree(agnes_z_wards, k = 10) 
+                              )
+```
+
+```{r}
+competition_clusters
+```
+
+```{r}
+plot(agnes_z_wards)
+```
+
+```{r}
+table(cutree(agnes_z_wards, k = 4))
+table(cutree(agnes_z_wards, k = 5))
+```
+```{r}
+cluster_5 <- competition_clusters[,c(1,8)] 
+cluster_5_1_2 <- filter(cluster_5, if_5_clusters == 1 | if_5_clusters == 2)
+cluster_4_1 <- filter(competition_clusters, if_4_clusters == 1)
+```
+```{r}
+inner_join(competition,cluster_5_1_2)
+```
+
+```{r}
+inner_join(cluster_4_1,cluster_5_1_2)
+```
+
