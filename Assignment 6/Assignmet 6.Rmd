@@ -4,18 +4,6 @@ author:
   - name: "Marc Shervin Ignacio"
     affiliation: "2019-04690"
 date: "`r format(Sys.time(), '%d %B %Y')`"
-output:
-  html_document:
-    theme: lumen
-    toc: yes
-    toc_float: yes
-    toc_depth: 4
-    number_sections: no
-    highlight: pygments
-    fig_caption: yes
-editor_options: 
-  markdown: 
-    wrap: 72
 ---
 ```{r}
 library("tidyverse")
