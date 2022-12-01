@@ -94,20 +94,32 @@ competition_clusters
 ```
 
 ```{r}
-hclust_centers <- competition_clusters %>%
-                      mutate(hclust = cutree(agnes_z_wards, k = 4)) %>%
-                      group_by(hclust) %>%
-                      summarise_all(.funs = mean) %>%
-                      select(1,3,4,5,6)
-hclust_centers
+init_centers <- competition_clusters %>%
+                  select(2,3,4,5,7) %>%
+                  mutate_all(.funs = scale) %>%
+                  group_by(if_4_clusters) %>%
+                  summarise_all(.funs = mean) %>%
+                  select(-if_4_clusters)
+```
+```{r}
+kmeans1 <- kmeans(x = scale(competition[-1]), centers = init_centers)
+table(kmeans1$cluster)
 ```
 
 ```{r}
-k_4 <- kmeans(competition, hclust_centers)
+dist_euc_z2  <- daisy(competition[-1], metric = "euclidean", stand = T)
+kmeans_stats <- fpc::cluster.stats(d = dist_euc_z2, clustering = kmeans1$cluster)
+hclust_stats <- fpc::cluster.stats(d = dist_euc_z2, clustering = competition_clusters$if_4_clusters)
+c("kmeans" = kmeans_stats$avg.silwidth, "hclust" = hclust_stats$avg.silwidth)
 ```
 
 ```{r}
-fpc::cluster.stats(d = dist_euc_z2, clustering = kmeans1$cluster, alt.clustering = ward_z2_clust, compareonly = T)
+c("kmeans" = kmeans_stats$ch, "hclust" = hclust_stats$ch)
+```
 
+### 3 
+```{r}
+Final_clusters <- cbind(competition, kmeans1$cluster)
+Final_clusters
 ```
 
