@@ -119,7 +119,60 @@ c("kmeans" = kmeans_stats$ch, "hclust" = hclust_stats$ch)
 
 ### 3 
 ```{r}
-Final_clusters <- cbind(competition, kmeans1$cluster)
+Final_clusters <- cbind(competition, cluster = kmeans1$cluster)
 Final_clusters
+```
+```{r}
+final_centers <- Final_clusters[,-1] %>%
+                  group_by(cluster) %>%
+                  summarise_all(.funs = mean)
+final_centers
+```
+```{r}
+means_melted <- reshape2::melt(final_centers, id="cluster",
+                                  variable.name="Factor", value.name="Mean")
+means_melted
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(means_melted, aes(Factor, Mean)) + 
+  facet_wrap(~ cluster, nrow=1) + #place the factors in separate facets
+  geom_bar(stat="identity") + #make the bars
+  coord_flip() + #flip the axes so the test names can be horizontal  
+  #define the fill color gradient: blue=positive, red=negative
+  scale_fill_gradient2(name = "Loading", 
+                       high = "blue", mid = "white", low = "red", 
+                       midpoint=0, guide=F) +
+  ggtitle("K = 4, Kmeans") +
+  xlab("Variables") +
+  ylab("Means") + #improve y-axis label
+  theme_bw(base_size=10)
+```
+```{r}
+competition[,-1] %>%
+  mutate_all(.funs = scale) %>%
+  mutate(cluster = kmeans1$cluster) %>%
+  group_by(cluster) %>%
+  summarise_all(.funs = mean) %>%
+  reshape2::melt(id="cluster", variable.name="Factor", value.name="Scale") -> means_melted
+
+```
+```{r}
+library(ggplot2)
+
+ggplot(means_melted, aes(Factor, Scale, fill=Scale)) + 
+  facet_wrap(~ cluster, nrow=1) + #place the factors in separate facets
+  geom_bar(stat="identity") + #make the bars
+  coord_flip() + #flip the axes so the test names can be horizontal  
+  #define the fill color gradient: blue=positive, red=negative
+  ggtitle("K = 4, Kmeans") +
+  scale_fill_gradient2(name = "Scale", 
+                       high = "blue", low = "red", 
+                       midpoint=0, guide="none") +
+  xlab("Variables") +
+  ylab("Means") + #improve y-axis label
+  theme_bw(base_size=10)
 ```
 
