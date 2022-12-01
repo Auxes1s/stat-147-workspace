@@ -20,6 +20,7 @@ editor_options:
 ```{r}
 library("tidyverse")
 library("readxl")
+library(dplyr)
 library("cluster")
 library("fpc")
 library("NbClust")
@@ -27,7 +28,7 @@ library("NbClust")
 
 ```{r}
 competition <- read_excel("Local Competitiveness Data.xlsx", sheet = "DATA")
-data_matrix <- competition %>% select(-`PROVINCE / LGU`)
+data_matrix <- competition %>% select(-1)
 ```
 
 ```{r}
@@ -117,39 +118,11 @@ c("kmeans" = kmeans_stats$avg.silwidth, "hclust" = hclust_stats$avg.silwidth)
 c("kmeans" = kmeans_stats$ch, "hclust" = hclust_stats$ch)
 ```
 
-### 3 
 ```{r}
 Final_clusters <- cbind(competition, cluster = kmeans1$cluster)
-Final_clusters
-```
-```{r}
-final_centers <- Final_clusters[,-1] %>%
-                  group_by(cluster) %>%
-                  summarise_all(.funs = mean)
-final_centers
-```
-```{r}
-means_melted <- reshape2::melt(final_centers, id="cluster",
-                                  variable.name="Factor", value.name="Mean")
-means_melted
 ```
 
-```{r}
-library(ggplot2)
 
-ggplot(means_melted, aes(Factor, Mean)) + 
-  facet_wrap(~ cluster, nrow=1) + #place the factors in separate facets
-  geom_bar(stat="identity") + #make the bars
-  coord_flip() + #flip the axes so the test names can be horizontal  
-  #define the fill color gradient: blue=positive, red=negative
-  scale_fill_gradient2(name = "Loading", 
-                       high = "blue", mid = "white", low = "red", 
-                       midpoint=0, guide=F) +
-  ggtitle("K = 4, Kmeans") +
-  xlab("Variables") +
-  ylab("Means") + #improve y-axis label
-  theme_bw(base_size=10)
-```
 ```{r}
 competition[,-1] %>%
   mutate_all(.funs = scale) %>%
@@ -168,11 +141,45 @@ ggplot(means_melted, aes(Factor, Scale, fill=Scale)) +
   coord_flip() + #flip the axes so the test names can be horizontal  
   #define the fill color gradient: blue=positive, red=negative
   ggtitle("K = 4, Kmeans") +
-  scale_fill_gradient2(name = "Scale", 
-                       high = "blue", low = "red", 
-                       midpoint=0, guide="none") +
+    #scale_fill_gradient(low = "red", high = "green")+
+   scale_fill_gradient2(name = "Scale", 
+                        high = "blue", low = "red", 
+                        midpoint=0) +
   xlab("Variables") +
   ylab("Means") + #improve y-axis label
   theme_bw(base_size=10)
 ```
+```{r}
+radiant.data::dtab(Final_clusters)
+```
+
+```{r}
+
+# Libraries
+library(mapsapi)
+library(leaflet)
+
+```
+```{r}
+getColor <- function(x){
+  case_when(
+    x == 1 ~ "yellow",
+    x == 2 ~ "#90EE90",
+    x == 3 ~ "red",
+    x == 4 ~ "green"
+  )
+}
+
+```
+```{r}
+load("point.RData")
+
+palette = colorFactor(palette = "Set2", domain = point$location_type)
+
+leaflet() %>% 
+  addProviderTiles(provider = providers$CartoDB.Positron) %>%
+  addCircleMarkers(data = point, color = getColor(Final_clusters$cluster)) %>%
+  setView(lng = 121.0550093, lat = 14.4770279, zoom = 12)
+```
+
 
