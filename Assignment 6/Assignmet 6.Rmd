@@ -166,7 +166,7 @@ palette = colorFactor(palette = "Set2", domain = point$location_type)
 
 leaflet() %>% 
   addProviderTiles(provider = providers$CartoDB.Positron) %>%
-  addCircleMarkers(data = point, color = getColor(Final_clusters$cluster)) %>%
+  addCircleMarkers(data = point, color = getColor(Final_clusters$cluster),label = ~address_google) %>%
   setView(lng = 121.0550093, lat = 14.4770279, zoom = 12)
 ```
 
