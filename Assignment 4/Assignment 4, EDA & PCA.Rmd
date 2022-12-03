@@ -71,7 +71,7 @@ show_table(head(nba_nonshooting), "Shooting statistics")
 pca_shooting <- prcomp(x = nba_shooting, scale.=T)
 show_table(summary(pca_shooting)$importance, "Proportion of Total Variance retained per PC")
 show_table(cbind(1:length(pca_shooting$sdev),pca_shooting$sdev),"Standard deviation of components")
-show_table(pca_shooting$rotation, "PC Loadings")
+show_table(pca_shooting$rotation[,1:2], "PC Loadings")
 ```
 
 #### Non-shooting Statistics
@@ -79,7 +79,45 @@ show_table(pca_shooting$rotation, "PC Loadings")
 pca_nonshooting <- prcomp(x = nba_nonshooting, scale.=T)
 show_table(summary(pca_nonshooting)$importance, "Proportion of Total Variance retained per PC")
 show_table(cbind(1:length(pca_nonshooting$sdev),pca_nonshooting$sdev),"Standard deviation of components")
-show_table(pca_nonshooting$rotation, "PC Loadings")
+show_table(pca_nonshooting$rotation[,1:2], "PC Loadings")
+
+```
+```{r}
+
+library(ggplot2)
+
+ggplot(reshape2::melt(pca_shooting$rotation[,1:2]), aes(Var1, value, fill=value)) + 
+  facet_wrap(~ Var2, nrow=1) + #place the factors in separate facets
+  geom_bar(stat="identity") + #make the bars
+  coord_flip() + #flip the axes so the test names can be horizontal  
+  #define the fill color gradient: blue=positive, red=negative
+  ggtitle("PCA_Shooting") +
+    #scale_fill_gradient(low = "red", high = "green")+
+   scale_fill_gradient2(name = "Scale", 
+                        high = "blue", low = "red", 
+                        midpoint=0) +
+  xlab("Variable") +
+  ylab("Loadings") + #improve y-axis label
+  theme_bw(base_size=10)
+
+```
+```{r}
+
+library(ggplot2)
+
+ggplot(reshape2::melt(pca_nonshooting$rotation[,1:2]), aes(Var1, value, fill=value)) + 
+  facet_wrap(~ Var2, nrow=1) + #place the factors in separate facets
+  geom_bar(stat="identity") + #make the bars
+  coord_flip() + #flip the axes so the test names can be horizontal  
+  #define the fill color gradient: blue=positive, red=negative
+  ggtitle("PCA_Shooting") +
+    #scale_fill_gradient(low = "red", high = "green")+
+   scale_fill_gradient2(name = "Scale", 
+                        high = "blue", low = "red", 
+                        midpoint=0) +
+  xlab("Variable") +
+  ylab("Loadings") + #improve y-axis label
+  theme_bw(base_size=10)
 
 ```
 
