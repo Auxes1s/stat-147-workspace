@@ -1,0 +1,89 @@
+---
+title: "cluster try"
+author: "james"
+date: "2022-12-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library("tidyverse")
+library("readxl")
+library("cluster")
+library("fpc")
+library("NbClust")
+```
+
+```{r data}
+setwd("D:/OneDrive - University of the Philippines/Academics/4th Year 1st Sem/stat-147-workspace/Assignment 6")
+
+competition <- read_excel(path = "Local Competitiveness Data.xlsx", sheet = "DATA")
+competition
+
+data_matrix <- competition %>% select(-`PROVINCE / LGU`)
+```
+
+
+```{r}
+validation_stats <- NbClust::NbClust(data = data_matrix, diss = NULL, min.nc = 3, max.nc = 5, method = "ward.D")
+```
+```{r}
+validation_stats$All.index %>%
+  as_tibble(rownames = "hclust")
+```
+
+```{r}
+agnes_z_wards <- cluster::agnes(x = data_matrix,diss = FALSE, stand = T, method = "ward")
+
+competition_clusters <- competition %>%
+                            mutate(
+                              if_3_clusters = cutree(agnes_z_wards, k = 3),
+                              if_4_clusters = cutree(agnes_z_wards, k = 4),
+                              if_5_clusters = cutree(agnes_z_wards, k = 5),
+                              if_6_clusters = cutree(agnes_z_wards, k = 6),
+                              if_7_clusters = cutree(agnes_z_wards, k = 7),
+                              if_8_clusters = cutree(agnes_z_wards, k = 8),
+                              if_9_clusters = cutree(agnes_z_wards, k = 9),
+                              if_10_clusters= cutree(agnes_z_wards, k = 10) 
+                              )
+
+```
+
+```{r}
+agnes_z_wards <- cluster::agnes(x = data_matrix,diss = FALSE, stand = T, method = "ward")
+
+competition_clusters2 <- competition %>%
+                            mutate(
+                              if_10_clusters= cutree(agnes_z_wards, k = 4) 
+                              )
+competition_clusters2
+
+```
+
+```{r}
+fpc::cluster.stats(d = data_matrix, clustering = competition_clusters2, alt.clustering = agnes_z_wards, compareonly = T)
+```
+```
+
+```{r}
+#c("kmeans" = kmeans_stats$avg.silwidth, "hclust" = hclust_stats$avg.silwidth)
+km_ch <- fpc::kmeansruns(data = scale(data_matrix), krange = 1:10, criterion = "ch")
+km_ch$crit
+
+km_asw <- fpc::kmeansruns(data = scale(data_matrix), krange = 1:10, criterion = "asw")
+km_asw$crit
+```
+
+```{r}
+write_csv(as_tibble(validation_stats$All.index, rownames = "no. of clusters"), file = "internal validation metrics.csv")
+```
+
+```{r}
+comp_cluster4<- cutree(tree = agnes_z_wards, k = 4)
+table(comp_cluster4)
+
+hclust_centers <- data_matrix %>%
+                      mutate(hclust = comp_cluster4) %>%
+                      group_by(hclust) %>%
+                      summarise_all(.funs = mean)
+hclust_centers
+```

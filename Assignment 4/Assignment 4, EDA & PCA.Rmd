@@ -18,6 +18,7 @@ editor_options:
   markdown:
     wrap: 72
 ---
+
 ```{r, echo=FALSE}
 show_table <- function(x,text=NULL){
   x %>%
@@ -40,7 +41,9 @@ nba <- readxl::read_xlsx('NBA 1819 Regular Season - Data.xlsx')
 
 show_table(head(nba),"NBA 1819 Regular Season Data")
 ```
+
 ### Knowing more about our dataset:
+
 ```{r}
 str(nba)
 ```
@@ -48,7 +51,9 @@ str(nba)
 ```{r}
 summary(nba)
 ```
+
 ### Preparing our data
+
 ```{r}
 colnames(nba)
 ```
@@ -61,12 +66,10 @@ nba_nonshooting <- nba[18:ncol(nba)]
 show_table(head(nba_nonshooting), "Shooting statistics")
 ```
 
-
-
-
 ### Principal Component Analysis
 
 #### Shooting Statistics
+
 ```{r}
 pca_shooting <- prcomp(x = nba_shooting, scale.=T)
 show_table(summary(pca_shooting)$importance, "Proportion of Total Variance retained per PC")
@@ -75,6 +78,7 @@ show_table(pca_shooting$rotation, "PC Loadings")
 ```
 
 #### Non-shooting Statistics
+
 ```{r}
 pca_nonshooting <- prcomp(x = nba_nonshooting, scale.=T)
 show_table(summary(pca_nonshooting)$importance, "Proportion of Total Variance retained per PC")
@@ -91,6 +95,7 @@ data_with_scores <- nba %>%
                              others2 = pca_nonshooting$x[,2])
 data_with_scores %>% show_table()
 ```
+
 ```{r}
 #PCA_Shooting
 arrange(data_with_scores, desc(shooting1))[1:5,c("PLAYER","shooting1")] %>% show_table("Top 5 for Shooting1")
@@ -99,6 +104,7 @@ arrange(data_with_scores, (shooting1))[1:5,c("PLAYER","shooting1")] %>% show_tab
 arrange(data_with_scores, desc(shooting2))[1:5,c("PLAYER","shooting2")] %>% show_table("Top 5 for Shooting2")
 arrange(data_with_scores, (shooting2))[1:5,c("PLAYER","shooting2")] %>% show_table("Last 5 for Shooting2")
 ```
+
 ```{r}
 #PCA_Nonhooting
 arrange(data_with_scores, desc(others1))[1:5,c("PLAYER","others1")] %>% show_table("Top 5 for others1")
@@ -108,8 +114,8 @@ arrange(data_with_scores, desc(others2))[1:5,c("PLAYER","others2")] %>% show_tab
 arrange(data_with_scores, (others2))[1:5,c("PLAYER","others2")] %>% show_table("Last 5 for others2")
 ```
 
-
 ### Visualization of results
+
 ```{r}
 factoextra::fviz_pca_var(pca_shooting)
 layout(matrix(1:2, ncol=2))
@@ -124,7 +130,6 @@ layout(matrix(1:2, ncol=2))
 screeplot(pca_nonshooting)
 screeplot(pca_nonshooting, type="lines")
 ```
-
 
 ```{r}
 data_with_scores %>%
@@ -157,8 +162,6 @@ data_with_scores %>%
   select(c("POSITION",18:ncol(nba))) %>%
   show_table("Mean across nonshooting statistics")
 ```
-
-
 
 ```{r}
 center1 <- data_with_scores %>% select(shooting1, shooting2)
@@ -213,4 +216,3 @@ data_with_scores %>%
   select(PLAYER, extreme)%>%
   show_table()
 ```
-
