@@ -83,9 +83,7 @@ show_table(pca_nonshooting$rotation[,1:2], "PC Loadings")
 
 ```
 ```{r}
-
 library(ggplot2)
-
 ggplot(reshape2::melt(pca_shooting$rotation[,1:2]), aes(Var1, value, fill=value)) + 
   facet_wrap(~ Var2, nrow=1) + #place the factors in separate facets
   geom_bar(stat="identity") + #make the bars
@@ -99,10 +97,8 @@ ggplot(reshape2::melt(pca_shooting$rotation[,1:2]), aes(Var1, value, fill=value)
   xlab("Variable") +
   ylab("Loadings") + #improve y-axis label
   theme_bw(base_size=10)
-
 ```
 ```{r}
-
 library(ggplot2)
 
 ggplot(reshape2::melt(pca_nonshooting$rotation[,1:2]), aes(Var1, value, fill=value)) + 
@@ -161,6 +157,26 @@ factoextra::fviz_pca_var(pca_nonshooting)
 layout(matrix(1:2, ncol=2))
 screeplot(pca_nonshooting)
 screeplot(pca_nonshooting, type="lines")
+```
+
+```{r}
+data_with_scores %>%
+  filter(center + forward + guard == 1) %>%
+  tidyr::pivot_longer(cols = shooting1:others2, names_to = "PCs", values_to = "score") %>%
+  ggplot(aes(x = POSITION, y = score)) +
+  ggdist::stat_halfeye(adjust = .5, width = .7, .width = 0, justification = -.2, point_colour = NA) + 
+  geom_boxplot(aes(fill = POSITION),width = .2) + 
+
+  facet_wrap(.~PCs, scale = "free_y")
+```
+```{r}
+data_with_scores %>%
+  filter(center + forward + guard == 1) %>%
+  tidyr::pivot_longer(cols = shooting1:others2, names_to = "PCs", values_to = "score") %>%
+  ggplot(aes(x = POSITION, y = score)) +
+  ggdist::stat_halfeye(adjust = .5, width = .7, .width = 0, justification = -.2, point_colour = NA) + 
+  geom_boxplot(aes(fill = POSITION),width = .2) + 
+  facet_wrap(.~PCs, scale = "free_y")
 ```
 
 

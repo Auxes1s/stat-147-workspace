@@ -1,0 +1,63 @@
+---
+title: "Web apps"
+author:
+  - name: "Marc Shervin Ignacio"
+    affiliation: "2019-04690"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    theme: lumen
+    toc: yes
+    toc_float: yes
+    toc_depth: 4
+    number_sections: no
+    highlight: pygments
+    fig_caption: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+### Interactive database
+
+```{r, echo=FALSE}
+Final_clusters <- read.csv("Final_clusters.csv")[,-1]
+radiant.data::dtab(Final_clusters)
+```
+
+------------------------------------------------------------------------
+
+<br>
+
+------------------------------------------------------------------------
+
+```{r,echo=FALSE, warning= FALSE, message=FALSE}
+# Libraries
+library(mapsapi)
+library(leaflet)
+library(leaflet.extras)
+library(dplyr)
+getColor <- function(x){
+  case_when(
+    x == 1 ~ "yellow",
+    x == 2 ~ "#90EE90",
+    x == 3 ~ "red",
+    x == 4 ~ "green"
+  )
+}
+
+```
+
+### Interactive map
+
+```{r, echo=FALSE, warning=FALSE}
+load("point.RData")
+
+palette = colorFactor(palette = "Set2", domain = point$location_type)
+
+leaflet() %>% 
+  addProviderTiles(provider = providers$CartoDB.Positron) %>%
+  addCircleMarkers(data = point, color = getColor(Final_clusters$cluster),label = ~address_google) %>%
+  addFullscreenControl() %>%
+  setView(lng = 121.0550093, lat = 14.4770279, zoom = 12)
+```
