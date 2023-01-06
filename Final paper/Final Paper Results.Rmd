@@ -29,7 +29,7 @@ audio_features <- read_xlsx("data.xlsx")
 ```
 ### First Objective
 ```{r}
-filtered_audio_features <- audio_features %>% select(-c("...1", "type", "id", "uri", "track_href", "analysis_url", "track.name"  ))
+filtered_audio_features <- audio_features %>% select(-c("...1", "type", "id", "uri", "track_href", "analysis_url", "track.name" , "popularity" ))
 ```
 ```{r}
 filtered_audio_features %>% summary()
@@ -45,9 +45,9 @@ ggp2
 ```{r}
 continuous_features <- select(filtered_audio_features, -c("key", "mode", "time_signature"))
 ```
-```{r}
-continuous_features$popularity[198] = 0
-```
+# ```{r}
+# continuous_features$popularity[198] = 0
+# ```
 
 ```{r}
 spotify_pc <- prcomp(x = continuous_features, scale.=T)
@@ -73,8 +73,8 @@ ggplot(reshape2::melt(spotify_pc$rotation[,1:5]), aes(Var1, value, fill=value)) 
 ```
 
 ```{r}
-data_matrix <- spotify_pc$x[,1:5]
-validation_stats <- NbClust::NbClust(data = data_matrix, diss = NULL, min.nc = 2, max.nc = 10, method = "ward.D")
+datamatrix <- spotify_pc$x[,1:5]
+validation_stats <- NbClust::NbClust(data = datamatrix, diss = NULL, min.nc = 2, max.nc = 10, method = "ward.D")
 ```
 ```{r}
 validation_stats$All.index %>%
@@ -91,9 +91,10 @@ validation_stats$Best.nc %>%
 ```
 
 ```{r}
-agnes_z_wards <- cluster::agnes(x = data_matrix,diss = FALSE, stand = T, method = "ward")
+agnes_z_wards <- cluster::agnes(x = datamatrix,diss = FALSE, stand = T, method = "ward")
 
-spotify_clusters <- audio_features %>%
+spotify_clusters <- datamatrix %>%
+                            as.data.frame() %>%
                             mutate(
                               if_3_clusters = cutree(agnes_z_wards, k = 3),
                               if_4_clusters = cutree(agnes_z_wards, k = 4),
@@ -108,36 +109,39 @@ spotify_clusters <- audio_features %>%
 
 
 ```{r}
+table(cutree(agnes_z_wards, k = 3))
+```
+
+
+```{r}
 plot(agnes_z_wards)
 ```
 
 
-```{r}
-aggregate(scale(data[,c(2,3,4,5)]), competition_clusters[,7], FUN=mean)
-```
 
 ```{r}
-init_centers <- competition_clusters %>%
-                  select(2,3,4,5,7) %>%
+init_centers <- spotify_clusters %>%
+                  select(1:6) %>%
                   mutate_all(.funs = scale) %>%
-                  group_by(if_4_clusters) %>%
+                  group_by(if_3_clusters) %>%
                   summarise_all(.funs = mean) %>%
-                  select(-if_4_clusters)
-```
-```{r}
-
-cbind(cluster = c(1,2,3,4),init_centers)
+                  select(-if_3_clusters)
 ```
 
 ```{r}
-kmeans1 <- kmeans(x = scale(competition[-1]), centers = init_centers)
+cbind(cluster = c(1,2,3),init_centers)
+```
+
+
+```{r}
+kmeans1 <- kmeans(x = scale(datamatrix), centers = init_centers)
 table(kmeans1$cluster)
 ```
 
 ```{r}
-dist_euc_z2  <- daisy(competition[-1], metric = "euclidean", stand = T)
+dist_euc_z2  <- daisy(datamatrix, metric = "euclidean", stand = T)
 kmeans_stats <- fpc::cluster.stats(d = dist_euc_z2, clustering = kmeans1$cluster)
-hclust_stats <- fpc::cluster.stats(d = dist_euc_z2, clustering = competition_clusters$if_4_clusters)
+hclust_stats <- fpc::cluster.stats(d = dist_euc_z2, clustering = spotify_clusters$if_3_clusters)
 c("kmeans" = kmeans_stats$avg.silwidth, "hclust" = hclust_stats$avg.silwidth)
 ```
 
@@ -146,19 +150,19 @@ c("kmeans" = kmeans_stats$ch, "hclust" = hclust_stats$ch)
 ```
 
 ```{r}
-Final_clusters <- cbind(competition, cluster = kmeans1$cluster)
+Final_clusters <- cbind(datamatrix, cluster = kmeans1$cluster)
 ```
 
 
 ```{r}
-competition[,-1] %>%
-  mutate_all(.funs = scale) %>%
-  mutate(cluster = kmeans1$cluster) %>%
-  group_by(cluster) %>%
-  summarise_all(.funs = mean) %>%
-  reshape2::melt(id="cluster", variable.name="Factor", value.name="Scale") -> means_melted
-
+Final_clusters %>%
+                  as.data.frame() %>%
+                  group_by(cluster) %>%
+                  summarise_all(.funs = mean) %>%
+                  reshape2::melt(id="cluster", variable.name="Factor", value.name="Scale") -> means_melted
 ```
+
+
 ```{r}
 library(ggplot2)
 
@@ -176,37 +180,3 @@ ggplot(means_melted, aes(Factor, Scale, fill=Scale)) +
   ylab("Means") + #improve y-axis label
   theme_bw(base_size=10)
 ```
-```{r}
-radiant.data::dtab(Final_clusters)
-```
-
-```{r}
-
-# Libraries
-library(mapsapi)
-library(leaflet)
-
-```
-```{r}
-getColor <- function(x){
-  case_when(
-    x == 1 ~ "yellow",
-    x == 2 ~ "#90EE90",
-    x == 3 ~ "red",
-    x == 4 ~ "green"
-  )
-}
-
-```
-```{r}
-load("point.RData")
-
-palette = colorFactor(palette = "Set2", domain = point$location_type)
-
-leaflet() %>% 
-  addProviderTiles(provider = providers$CartoDB.Positron) %>%
-  addCircleMarkers(data = point, color = getColor(Final_clusters$cluster),label = ~address_google) %>%
-  setView(lng = 121.0550093, lat = 14.4770279, zoom = 12)
-```
-
-
