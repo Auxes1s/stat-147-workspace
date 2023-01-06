@@ -1,8 +1,8 @@
 ---
-title: "Stat 145 Assignment 6"
+title: "Final Paper Results"
 author:
-  - name: "Marc Shervin Ignacio"
-    affiliation: "2019-04690"
+- name: Marc Shervin Ignacio
+  affiliation: "2019-04690"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 ---
 ```{r, echo=FALSE}
@@ -26,21 +26,78 @@ library(kableExtra)
 ```{r}
 setwd("D:/Downloads")
 audio_features <- read_xlsx("data.xlsx")
+audio_features$duration_ms <- audio_features$duration_ms/60000
+load("division.RData")
+load("809000s.RData")
 ```
 ### First Objective
 ```{r}
+groups <- as.data.frame(rbind(cbind(division[[1]]$id, 1),
+cbind(t809000s[[1]], 2),
+cbind(t809000s[[2]], 3),
+cbind(t809000s[[3]], 4),
+cbind(division[[3]], 5)))
+colnames(groups) <- c("id", "group")
+```
+
+```{r}
+first_research <- left_join(audio_features, groups, by = c("id" = "id")) %>% select(-c("...1", "type", "id", "uri", "track_href", "analysis_url", "track.name" , "popularity" ))
+```
+
+```{r}
 filtered_audio_features <- audio_features %>% select(-c("...1", "type", "id", "uri", "track_href", "analysis_url", "track.name" , "popularity" ))
 ```
+
 ```{r}
-filtered_audio_features %>% summary()
-```
-```{r}
-ggp2 <- ggplot(melt(filtered_audio_features), aes(x = value)) +    # Draw each column as density
+melted_groups <- melt(first_research)
+groupings <- list()
+for(i in 1:5){
+  groupings[[i]] <- melted_groups[melted_groups[,"group"] == i,]
+}
+
+ggp2 <- ggplot(groupings[[1]], aes(x = value)) +    # Draw each column as density
   geom_density() + 
   facet_wrap(~ variable, scales = "free")
 ggp2
+  
+ggp2 <- ggplot(groupings[[2]], aes(x = value)) +    # Draw each column as density
+  geom_density() + 
+  facet_wrap(~ variable, scales = "free")
+ggp2
+  
+ggp2 <- ggplot(groupings[[3]], aes(x = value)) +    # Draw each column as density
+  geom_density() + 
+  facet_wrap(~ variable, scales = "free")
+ggp2
+  
+
+ggp2 <- ggplot(groupings[[4]], aes(x = value)) +    # Draw each column as density
+  geom_density() + 
+  facet_wrap(~ variable, scales = "free")
+ggp2
+  
+ggp2 <- ggplot(groupings[[5]], aes(x = value)) +    # Draw each column as density
+  geom_density() + 
+  facet_wrap(~ variable, scales = "free")
+ggp2
+  
 
 ```
+
+```{r}
+groupings_sum <- list()
+for(i in 1:5){
+  groupings_sum[[i]] <- summary(first_research[first_research[,"group"] == i,])
+}
+groupings_sum
+```
+```{r}
+vtable::st(first_research, group = "group", summ=c('min(x)', 'max(x)',
+                'mean(x)',
+                'median(x)',
+                'sd(x)'))
+```
+
 ### Second research objective
 ```{r}
 continuous_features <- select(filtered_audio_features, -c("key", "mode", "time_signature"))
@@ -55,6 +112,11 @@ show_table(summary(spotify_pc)$importance, "Proportion of Total Variance retaine
 show_table(cbind(1:length(spotify_pc$sdev),spotify_pc$sdev),"Standard deviation of components")
 show_table(spotify_pc$rotation, "PC Loadings")
 ```
+```{r}
+library(factoextra)
+fviz_pca_biplot(spotify_pc, geom = FALSE)
+```
+
 ```{r}
 library(ggplot2)
 ggplot(reshape2::melt(spotify_pc$rotation[,1:5]), aes(Var1, value, fill=value)) + 
@@ -72,22 +134,28 @@ ggplot(reshape2::melt(spotify_pc$rotation[,1:5]), aes(Var1, value, fill=value)) 
   theme_bw(base_size=10)
 ```
 
+
+### Third Research Objective
 ```{r}
 datamatrix <- spotify_pc$x[,1:5]
 validation_stats <- NbClust::NbClust(data = datamatrix, diss = NULL, min.nc = 2, max.nc = 10, method = "ward.D")
 ```
+
 ```{r}
 validation_stats$All.index %>%
-  as_tibble(rownames = "no. of clusters")
+  as_tibble(rownames = "no. of clusters") %>%
+  show_table()
 ```
 
 ```{r}
 validation_stats$All.index %>%
-  as_tibble(rownames = "no. of clusters")
+  as_tibble(rownames = "no. of clusters") %>%
+  show_table()
 ```
 ```{r}
 validation_stats$Best.nc %>%
-  as_tibble(rownames = "Number_clusters")
+  as_tibble(rownames = "Number_clusters") %>%
+  show_table()
 ```
 
 ```{r}
@@ -109,7 +177,7 @@ spotify_clusters <- datamatrix %>%
 
 
 ```{r}
-table(cutree(agnes_z_wards, k = 3))
+table(cutree(agnes_z_wards, k = 5))
 ```
 
 
@@ -121,15 +189,15 @@ plot(agnes_z_wards)
 
 ```{r}
 init_centers <- spotify_clusters %>%
-                  select(1:6) %>%
+                  select(1:5,if_5_clusters) %>%
                   mutate_all(.funs = scale) %>%
-                  group_by(if_3_clusters) %>%
+                  group_by(if_5_clusters) %>%
                   summarise_all(.funs = mean) %>%
-                  select(-if_3_clusters)
+                  select(-if_5_clusters)
 ```
 
 ```{r}
-cbind(cluster = c(1,2,3),init_centers)
+cbind(cluster = c(1,2,3,4,5),init_centers) %>% show_table()
 ```
 
 
@@ -171,11 +239,12 @@ ggplot(means_melted, aes(Factor, Scale, fill=Scale)) +
   geom_bar(stat="identity") + #make the bars
   coord_flip() + #flip the axes so the test names can be horizontal  
   #define the fill color gradient: blue=positive, red=negative
-  ggtitle("K = 4, Kmeans") +
+  ggtitle("K = 5, Kmeans") +
     #scale_fill_gradient(low = "red", high = "green")+
    scale_fill_gradient2(name = "Scale", 
                         high = "blue", low = "red", 
                         midpoint=0) +
+  scale_x_discrete(labels=c("Jazz Pop Quality", "Folk Pop Quality", "Upbeat Pop-Rock Quality", "Ballad Quality", "Rock Ballad Quality")) +
   xlab("Variables") +
   ylab("Means") + #improve y-axis label
   theme_bw(base_size=10)
